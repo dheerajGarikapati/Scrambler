@@ -17,13 +17,17 @@
 
 (defn application-html [title req function]
   (let [string-1 (get (:params req) :str1)
-        string-2 (get (:params req) :str2)]
-    (html-input-form title [:h3 (str "Scramble result for \"" string-1 "\" and \"" string-2 "\" is : " (function string-1 string-2))])))
+        string-2 (get (:params req) :str2)
+        result (function string-1 string-2)
+        output (str "\"" string-1 "\" can be rearranged to match \"" string-2 "\" : " result)]
+    (html-input-form title [:h3 output])))
 
 (defn scramble? [str1 str2]
-  (let [vec2 (vec str2)
-        value (map #(string/includes? str1 (str %)) vec2)]
-    (every? true? value)))
+  (let [result (reduce (fn [value1 value2]
+                         (and value1
+                              (clojure.string/includes? str1 (str value2))))
+                       (into [] (concat [true] (vec str2))))]
+    result))
 
 (defroutes myroutes
   (GET "/scramble" [] (html-input-form "Scramble Application"))
